@@ -111,14 +111,14 @@ class Network(object):
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         # print('b0:', nabla_b[0].shape)
         # print('b1:', nabla_b[1].shape)
-        activation = x
+        activation = x # the value of x
         activations = [x]
-        zs = []
+        zs = [] # the value before activation
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation) + b
             zs.append(z)
             activation = sigmoid(z)
-            activations.append(activation)
+            activations.append(activation) # the content of acitvations is [activation1,activation2],shape is [30*1,10*1]
 
         delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
         # print('delta0:',delta.shape)
