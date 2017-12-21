@@ -1,15 +1,17 @@
 import numpy as np
 import random
 
+
 def sigmoid(z):
     return 1.0 / (1.0 + np.exp(-z))
 
+
 def sigmoid_prime(z):
-    return sigmoid(z)*(1-sigmoid(z))
+    return sigmoid(z) * (1 - sigmoid(z))
+
 
 class Network(object):
-
-    def __init__(self,sizes):
+    def __init__(self, sizes):
         '''
 
         :param sizes: list type,save the number of neurons in every layer.
@@ -18,17 +20,17 @@ class Network(object):
 
         '''
 
-        #the number of layers
-        self.num_layers=len(sizes)
-        self.sizes=sizes
+        # the number of layers
+        self.num_layers = len(sizes)
+        self.sizes = sizes
 
         # generate biases between (0,1) for y neurons in every layer except input layer
-        self.biases=[np.random.randn(y,1) for y in sizes[1,:]]
+        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
 
-        #generate the weights between (0,1) for every connecting line
-        self.weights=[np.random.randn(y,x) for x,y in zip(sizes[:-1],sizes[1:])]
+        # generate the weights between (0,1) for every connecting line
+        self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
 
-    def feedforward(self,a):
+    def feedforward(self, a):
         '''
 
         :param a:input
@@ -36,11 +38,11 @@ class Network(object):
 
         '''
 
-        for b,w in zip(self.biases,self.weights):
-            a=sigmoid(np.dot(w,a)+b)
+        for b, w in zip(self.biases, self.weights):
+            a = sigmoid(np.dot(w, a) + b)
         return a
 
-    def SGD(self,training_data,epochs,mini_batch_size,eta,test_data=None):
+    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data=None):
         '''
 
         :param training_data:
@@ -52,21 +54,21 @@ class Network(object):
         '''
 
         if test_data:
-            n_test=len(test_data)
-        n=len(training_data)
+            n_test = len(test_data)
+        n = len(training_data)
         for j in range(epochs):
-            #disrupt the training set to change the sort order
+            # disrupt the training set to change the sort order
             random.shuffle(training_data)
-            #the training set is divided to the mini_batch
-            mini_batches=[training_data[k:k+mini_batch_size] for k in range(0,n,mini_batch_size)]
+            # the training set is divided to the mini_batch
+            mini_batches = [training_data[k:k + mini_batch_size] for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch,eta)
+                self.update_mini_batch(mini_batch, eta)
             if test_data:
-                print("epoch{0}:{1}/{2}".format(j,self.evaluate(test_data),n_test))
+                print("epoch{0}:{1}/{2}".format(j, self.evaluate(test_data), n_test))
             else:
                 print("epoch{0} complete".format(j))
 
-    def update_mini_batch(self,mini_batch,eta):
+    def update_mini_batch(self, mini_batch, eta):
         '''
 
         :param mini_batch:
@@ -74,18 +76,30 @@ class Network(object):
         :return:
         '''
 
-        nabla_b=[np.zeros(b.shape) for b in self.biases]
-        nabla_w=[np.zeros(w.shape) for w in self.weights]
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
 
-        for x,y in mini_batch:
-            delta_nabla_b,delta_nable_w=self.backprop(x,y)
-            nabla_b=[nb+dnb for nb,dnb in zip(nabla_b,delta_nabla_b)]
-            nabla_w=[nw+dnw for nw,dnw in zip(nabla_w,delta_nable_w)]
+        for x, y in mini_batch:
+            delta_nabla_b, delta_nable_w = self.backprop(x, y)
+            # print(len(delta_nabla_b))
+            # print(len(nabla_b))
+            # print(len(delta_nable_w))
+            # print(len(nabla_w))
+            # print(delta_nabla_b[0].shape)
+            # print(nabla_b[0].shape)
+            # # print(delta_nable_w[0].shape)
+            # # print(nabla_w[0].shape)
+            # print(delta_nabla_b[1].shape)
+            # print(nabla_b[1].shape)
+            # print(delta_nable_w[1].shape)
+            # print(nabla_w[1].shape)
+            nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
+            nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nable_w)]
 
-        self.weights=[w-(eta/len(mini_batch))*nw for w,nw in zip(self.weights,nabla_w)]
-        self.biases=[b-(eta/len(mini_batch))*nb for b,nb in zip(self.biases,nabla_b)]
+        self.weights = [w - (eta / len(mini_batch)) * nw for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - (eta / len(mini_batch)) * nb for b, nb in zip(self.biases, nabla_b)]
 
-    def backprop(self,x,y):
+    def backprop(self, x, y):
         '''
 
         :param x:trainging samples
@@ -93,29 +107,38 @@ class Network(object):
         :return:
         '''
 
-        nabla_b=[np.zeros(b.shape) for b in self.biases]
-        nabla_w=[np.zeros(w.shape) for w in self.weights]
-        activation=x
-        activations=[x]
-        zs=[]
-        for b,w in zip(self.biases,self.weights):
-            z=np.dot(w,activation)+b
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
+        # print('b0:', nabla_b[0].shape)
+        # print('b1:', nabla_b[1].shape)
+        activation = x
+        activations = [x]
+        zs = []
+        for b, w in zip(self.biases, self.weights):
+            z = np.dot(w, activation) + b
             zs.append(z)
-            activation=sigmoid(z)
+            activation = sigmoid(z)
             activations.append(activation)
 
-        delta=self.cost_derivative(activations[-1],y)*sigmoid_prime(zs[-1])
-        nabla_b[-1]=delta
-        nabla_w[-1]=np.dot(delta,activations[-2].transpose())
-        for l in range(2,self.num_layers):
-            z=zs[-l]
-            sp=sigmoid_prime(z)
-            delta=np.dot(self.weights[-l+1].transpose(),delta)*sp
-            nabla_b[-1]=delta
-            nabla_w[-1]=np.dot(delta,activations[-l-1].transpose())
-        return (nabla_b,nabla_w)
+        delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
+        # print('delta0:',delta.shape)
+        nabla_b[-1] = delta
+        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+        for l in range(2, self.num_layers):
+            z = zs[-l]
+            sp = sigmoid_prime(z)
+            # print('we:',self.weights[-l + 1].shape)
+            delta = np.dot(self.weights[-l + 1].transpose(), delta) * sp
+            # print('delta:', delta.shape)
+            nabla_b[-l] = delta
+            nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
+        # print('b0:',nabla_b[0].shape)
+        # print('b1:',nabla_b[1].shape)
+        return (nabla_b, nabla_w)
 
-    def evaluate(self,test_data):
-        test_result=[(np.argmax(self.feedforward(x)),y) for (x,y) in test_data]
-        return sum(int(x==y) for (x,y) in test_result)
+    def evaluate(self, test_data):
+        test_result = [(np.argmax(self.feedforward(x)), y) for (x, y) in test_data]
+        return sum(int(x == y) for (x, y) in test_result)
 
+    def cost_derivative(self,output_activations,y):
+        return (output_activations-y)
